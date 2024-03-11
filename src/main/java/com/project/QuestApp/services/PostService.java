@@ -5,10 +5,12 @@ import com.project.QuestApp.entities.User;
 import com.project.QuestApp.repos.PostRepository;
 import com.project.QuestApp.requests.PostCreateRequest;
 import com.project.QuestApp.requests.PostUpdateRequest;
+import com.project.QuestApp.responses.PostResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -21,10 +23,13 @@ public class PostService {
         this.userService = userService;
     }
 
-    public List<Post> getAllPosts(Optional<Long> userId) {
-        if (userId.isPresent())
-            return postRepository.findByUserId(userId.get());
-        return postRepository.findAll();
+    public List<PostResponse> getAllPosts(Optional<Long> userId) {
+        List<Post> list;
+        if (userId.isPresent()) {
+            list = postRepository.findByUserId(userId.get());
+        }
+        list = postRepository.findAll();
+        return list.stream().map(p -> new PostResponse(p)).collect(Collectors.toList());
     }
 
     public Post getOnePost(Long postId) {
@@ -45,7 +50,7 @@ public class PostService {
 
     public Post updateOnePostById(Long postId, PostUpdateRequest newPost) {
         Optional<Post> post = postRepository.findById(postId);
-        if (post.isPresent()){
+        if (post.isPresent()) {
             Post toUpdate = post.get();
             toUpdate.setTitle(newPost.getTitle());
             toUpdate.setText(newPost.getText());
